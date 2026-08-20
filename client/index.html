@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Strike-Web</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "/vendor/three.module.js",
+      "three/addons/": "/vendor/addons/"
+    }
+  }
+  </script>
+</head>
+<body>
+  <canvas id="game"></canvas>
+
+  <div id="hud">
+    <div id="fps">-- FPS</div>
+    <div id="crosshair"></div>
+    <div id="hint">WASD — движение · Space — прыжок · Shift — бег · Esc — выход</div>
+  </div>
+
+  <div id="overlay">
+    <div class="overlay-box">
+      <h1 id="overlay-title">STRIKE-WEB</h1>
+      <p id="overlay-hint">Кликни, чтобы играть</p>
+    </div>
+  </div>
+
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>

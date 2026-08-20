@@ -1,0 +1,14 @@
+{
+  "name": "strike-web",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Browser FPS in the style of Counter-Strike, built with Three.js",
+  "type": "module",
+  "scripts": {
+    "dev": "node server/dev-server.js",
+    "start": "node server/dev-server.js"
+  },
+  "dependencies": {
+    "three": "^0.160.0"
+  }
+}
