@@ -14,6 +14,8 @@ html, body {
   display: block;
 }
 
+.hidden { display: none !important; }
+
 /* ---------- HUD ---------- */
 #hud {
   position: fixed;
@@ -54,6 +56,115 @@ html, body {
   text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
   white-space: nowrap;
 }
+
+/* ---------- Кнопка настроек ---------- */
+#btn-settings {
+  position: fixed;
+  top: 12px;
+  right: 12px;
+  z-index: 30;
+  width: 42px;
+  height: 42px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 10px;
+  background: rgba(12, 16, 24, 0.6);
+  color: #e9eef5;
+  font-size: 20px;
+  cursor: pointer;
+  backdrop-filter: blur(4px);
+  transition: background 0.15s ease;
+}
+
+#btn-settings:hover { background: rgba(30, 38, 52, 0.8); }
+
+/* ---------- Панель настроек ---------- */
+#settings-panel {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 40;
+  width: min(420px, calc(100vw - 32px));
+  padding: 26px;
+  border-radius: 14px;
+  background: rgba(14, 18, 26, 0.92);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #e9eef5;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(6px);
+}
+
+#settings-panel h2 {
+  font-size: 22px;
+  letter-spacing: 1px;
+  color: #ffb43a;
+  margin-bottom: 20px;
+}
+
+.setting-row { margin-bottom: 18px; }
+
+.setting-row .label {
+  display: block;
+  font-size: 13px;
+  color: rgba(233, 238, 245, 0.7);
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.quality-btns { display: flex; gap: 8px; }
+
+.quality-btns button {
+  flex: 1;
+  padding: 10px 8px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.04);
+  color: #e9eef5;
+  cursor: pointer;
+  font-size: 13px;
+  transition: all 0.15s ease;
+}
+
+.quality-btns button:hover { background: rgba(255, 255, 255, 0.1); }
+
+.quality-btns button.active {
+  background: #ffb43a;
+  border-color: #ffb43a;
+  color: #16120a;
+  font-weight: 600;
+}
+
+.check {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 10px 0;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.check input { width: 16px; height: 16px; accent-color: #ffb43a; }
+
+.note {
+  margin: 14px 0;
+  font-size: 12px;
+  color: rgba(233, 238, 245, 0.55);
+}
+
+#btn-close-settings.primary {
+  width: 100%;
+  padding: 12px;
+  border: none;
+  border-radius: 8px;
+  background: #ffb43a;
+  color: #16120a;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+#btn-close-settings.primary:hover { background: #ffc35e; }
 
 /* ---------- Start overlay ---------- */
 #overlay {

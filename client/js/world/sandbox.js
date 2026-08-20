@@ -1,48 +1,69 @@
 import * as THREE from 'three';
+import { makeGroundTexture, makeSandTexture } from '../graphics/textures.js';
+import { buildGrass } from './grass.js';
+import { buildCacti } from './cacti.js';
+import { graphics } from '../config.js';
 
-// Песочница для проверки ядра: земля с процедурной текстурой, ящики, свет и небо.
+// Песочница для проверки ядра и графики: земля, ящики, трава, кактусы, песчаные зоны.
 export function buildSandbox(scene) {
   const world = {
     groundY: 0,
     colliders: [],
-    spawn: new THREE.Vector3(0, 1.7, 14),
+    spawn: new THREE.Vector3(0, 1.7, 16),
+    grass: null,
+    cacti: null,
   };
 
   // --- Небо и туман ---
   const skyColor = new THREE.Color(0x87ceeb);
   scene.background = skyColor;
-  scene.fog = new THREE.Fog(skyColor, 60, 220);
+  scene.fog = new THREE.Fog(skyColor, 60, 240);
 
   // --- Свет ---
   const hemi = new THREE.HemisphereLight(0xbfe3ff, 0x8a6f4d, 0.9);
   scene.add(hemi);
 
-  const sun = new THREE.DirectionalLight(0xfff2d8, 1.4);
+  const sun = new THREE.DirectionalLight(0xfff2d8, 1.5);
   sun.position.set(40, 60, 25);
   sun.castShadow = true;
   sun.shadow.mapSize.set(2048, 2048);
-  sun.shadow.camera.left = -60;
-  sun.shadow.camera.right = 60;
-  sun.shadow.camera.top = 60;
-  sun.shadow.camera.bottom = -60;
+  sun.shadow.camera.left = -70;
+  sun.shadow.camera.right = 70;
+  sun.shadow.camera.top = 70;
+  sun.shadow.camera.bottom = -70;
   sun.shadow.camera.near = 1;
-  sun.shadow.camera.far = 200;
+  sun.shadow.camera.far = 220;
   sun.shadow.bias = -0.0005;
   scene.add(sun);
 
-  // --- Земля (процедурная "шахматная" текстура — прототип Low-пресета) ---
+  // --- Земля ---
   const ground = new THREE.Mesh(
-    new THREE.PlaneGeometry(120, 120),
-    new THREE.MeshStandardMaterial({ map: makeCheckerTexture(), roughness: 0.95, metalness: 0 })
+    new THREE.PlaneGeometry(160, 160),
+    new THREE.MeshStandardMaterial({ map: makeGroundTexture(graphics.level), roughness: 0.95, metalness: 0 })
   );
   ground.rotation.x = -Math.PI / 2;
   ground.receiveShadow = true;
   scene.add(ground);
+  world.ground = ground;
 
-  // Сетка помогает ощущать движение и масштаб.
-  const grid = new THREE.GridHelper(120, 60, 0x5a4a32, 0x6f5d40);
+  // Сетка помогает ощущать движение (скрываем в Ultra).
+  const grid = new THREE.GridHelper(160, 80, 0x5a4a32, 0x6f5d40);
   grid.position.y = 0.01;
   scene.add(grid);
+  world.grid = grid;
+
+  // --- Песчаные зоны под кактусами ---
+  const sandMat = new THREE.MeshStandardMaterial({ map: makeSandTexture(graphics.level), roughness: 0.9 });
+  const sandPatches = [];
+  for (const [sx, sz] of [[-8, -6], [11, -9], [13, 7]]) {
+    const patch = new THREE.Mesh(new THREE.CircleGeometry(3.4, 24), sandMat);
+    patch.rotation.x = -Math.PI / 2;
+    patch.position.set(sx, 0.02, sz);
+    patch.receiveShadow = true;
+    scene.add(patch);
+    sandPatches.push(patch);
+  }
+  world.sandPatches = sandPatches;
 
   // --- Препятствия (ящики и колонны) ---
   const crateMat = new THREE.MeshStandardMaterial({ color: 0xc08a4a, roughness: 0.8 });
@@ -60,40 +81,39 @@ export function buildSandbox(scene) {
     });
   };
 
-  // Куча ящиков в центре
   box(-3, 0, 2, 2, 2, crateMat);
   box(0, -2, 2, 2, 2, crateMat);
   box(3, 1, 2, 1.4, 2, crateMat);
   box(-1, 4, 2, 3, 1.2, darkMat);
 
-  // Ряд колонн по бокам — проверка обхода препятствий
   box(-10, 0, 1.4, 6, 1.4, darkMat);
   box(10, -3, 1.4, 6, 1.4, darkMat);
   box(-10, -8, 1.4, 6, 1.4, darkMat);
   box(10, 8, 1.4, 6, 1.4, darkMat);
 
-  // Высокая башня — ориентир
   box(-16, -12, 3, 10, 3, crateMat);
   box(16, 12, 3, 10, 3, darkMat);
 
-  return world;
-}
+  // --- Трава и кактусы ---
+  world.grass = buildGrass(scene, { count: graphics.level === 'low' ? 0 : 4500 });
+  world.cacti = buildCacti(scene, [[-8, -6], [-6.2, -4.2], [11, -9], [13, -7.2], [13, 7], [15, 8.2]]);
 
-// Процедурная текстура шахматной доски (canvas -> texture).
-function makeCheckerTexture(size = 256, cols = 8) {
-  const canvas = document.createElement('canvas');
-  canvas.width = canvas.height = size;
-  const ctx = canvas.getContext('2d');
-  const cell = size / cols;
-  for (let y = 0; y < cols; y++) {
-    for (let x = 0; x < cols; x++) {
-      ctx.fillStyle = (x + y) % 2 === 0 ? '#b39b72' : '#8f7b56';
-      ctx.fillRect(x * cell, y * cell, cell, cell);
-    }
-  }
-  const tex = new THREE.CanvasTexture(canvas);
-  tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
-  tex.repeat.set(20, 20);
-  tex.colorSpace = THREE.SRGBColorSpace;
-  return tex;
+  // Применение настроек графики к этой сцене.
+  world.applyGraphics = (g) => {
+    ground.material.map = makeGroundTexture(g.level);
+    ground.material.needsUpdate = true;
+    sandMat.map = makeSandTexture(g.level);
+    sandMat.needsUpdate = true;
+    grid.visible = g.level !== 'ultra';
+    world.grass.setWind(g.grassWind);
+    world.cacti.setSway(g.grassWind);
+  };
+
+  // Покадровые эффекты (ветер, покачивание).
+  world.updateEffects = (dt) => {
+    world.grass.update(dt);
+    world.cacti.update(dt);
+  };
+
+  return world;
 }

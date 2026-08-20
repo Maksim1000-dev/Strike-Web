@@ -20,7 +20,28 @@
   <div id="hud">
     <div id="fps">-- FPS</div>
     <div id="crosshair"></div>
-    <div id="hint">WASD — движение · Space — прыжок · Shift — бег · Esc — выход</div>
+    <div id="hint">WASD — движение · Space — прыжок · Shift — бег · M — настройки</div>
+  </div>
+
+  <button id="btn-settings" title="Настройки (M)">⚙</button>
+
+  <div id="settings-panel" class="hidden">
+    <h2>Настройки</h2>
+
+    <div class="setting-row">
+      <span class="label">Качество графики</span>
+      <div class="quality-btns">
+        <button data-level="low">Низкое</button>
+        <button data-level="medium">Среднее</button>
+        <button data-level="ultra">Ультра</button>
+      </div>
+    </div>
+
+    <label class="check"><input type="checkbox" id="opt-fps" /> Показывать FPS</label>
+    <label class="check"><input type="checkbox" id="opt-shadows" /> Тени</label>
+
+    <p id="settings-note" class="note"></p>
+    <button id="btn-close-settings" class="primary">Продолжить</button>
   </div>
 
   <div id="overlay">

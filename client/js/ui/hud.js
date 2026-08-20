@@ -11,6 +11,10 @@ export class HUD {
     if (this.fpsEl) this.fpsEl.textContent = `${v} FPS`;
   }
 
+  applyGraphics(g) {
+    if (this.fpsEl) this.fpsEl.style.display = g.showFps ? '' : 'none';
+  }
+
   setLocked(locked, pointerLockUnavailable) {
     if (!this.overlayEl) return;
     if (locked) {
@@ -20,7 +24,7 @@ export class HUD {
       this.overlayTitle.textContent = 'STRIKE-WEB';
       this.overlayHint.textContent = pointerLockUnavailable
         ? 'Pointer Lock недоступен — зажми мышь и веди, чтобы осмотреться'
-        : 'Кликни, чтобы играть (WASD — движение · Space — прыжок · Shift — бег)';
+        : 'Кликни, чтобы играть (WASD — движение · Space — прыжок · Shift — бег · M — настройки)';
     }
   }
 }

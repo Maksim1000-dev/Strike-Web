@@ -1,14 +1,18 @@
 import * as THREE from 'three';
 import { graphics } from '../config.js';
 
-// Ядро: рендерер, сцена, камера и игровой цикл.
+// Ядро: рендерер, сцена, камера, пост-обработка и игровой цикл.
 export class Engine {
-  constructor(canvas) {
-    this.renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+  constructor(canvas, opts = {}) {
+    const antialias = opts.antialias ?? graphics.antialias;
+
+    this.renderer = new THREE.WebGLRenderer({ canvas, antialias });
     this.renderer.setPixelRatio(graphics.pixelRatio);
     this.renderer.setSize(window.innerWidth, window.innerHeight);
     this.renderer.shadowMap.enabled = graphics.shadows;
     this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    this.renderer.toneMappingExposure = 1.0;
 
     this.scene = new THREE.Scene();
     this.camera = new THREE.PerspectiveCamera(
@@ -21,19 +25,43 @@ export class Engine {
 
     this.clock = new THREE.Clock();
     this.player = null;
+    this.postfx = null;
     this.onBeforeRender = null;
 
     window.addEventListener('resize', this._onResize.bind(this));
+  }
+
+  setPlayer(player) {
+    this.player = player;
+  }
+
+  setPostfx(postfx) {
+    this.postfx = postfx;
+    this.postfx.setSize(
+      window.innerWidth,
+      window.innerHeight,
+      this.renderer.getPixelRatio()
+    );
+  }
+
+  // Применение настроек графики, которые можно менять на лету.
+  applyGraphics(g) {
+    this.renderer.setPixelRatio(g.pixelRatio);
+    this.renderer.shadowMap.enabled = g.shadows;
+    this._onResize(); // обновить размеры буферов под новый pixel ratio
   }
 
   _onResize() {
     this.camera.aspect = window.innerWidth / window.innerHeight;
     this.camera.updateProjectionMatrix();
     this.renderer.setSize(window.innerWidth, window.innerHeight);
-  }
-
-  setPlayer(player) {
-    this.player = player;
+    if (this.postfx) {
+      this.postfx.setSize(
+        window.innerWidth,
+        window.innerHeight,
+        this.renderer.getPixelRatio()
+      );
+    }
   }
 
   start() {
@@ -45,6 +73,8 @@ export class Engine {
     const dt = Math.min(this.clock.getDelta(), 0.05);
     if (this.player) this.player.update(dt);
     if (this.onBeforeRender) this.onBeforeRender(dt);
-    this.renderer.render(this.scene, this.camera);
+
+    if (this.postfx && this.postfx.enabled) this.postfx.render();
+    else this.renderer.render(this.scene, this.camera);
   }
 }
