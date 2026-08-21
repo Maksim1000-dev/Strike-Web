@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Strike-Web</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "/vendor/three.module.js",
+      "three/addons/": "/vendor/addons/"
+    }
+  }
+  </script>
+</head>
+<body>
+  <canvas id="game"></canvas>
+
+  <div id="hud">
+    <div id="fps">-- FPS</div>
+    <div id="map">Desert 2</div>
+
+    <div id="crosshair">
+      <span class="c top"></span>
+      <span class="c bottom"></span>
+      <span class="c left"></span>
+      <span class="c right"></span>
+    </div>
+    <div id="hitmarker">✕</div>
+
+    <div id="weapon">
+      <div id="weapon-name">Glock-18</div>
+      <div id="weapon-ammo">20 / 60</div>
+    </div>
+    <div id="reload-hint">ПЕРЕЗАРЯДКА…</div>
+
+    <div id="vitals">
+      <div class="bar-wrap hp">
+        <span class="bar-label">HP</span>
+        <div class="bar"><div class="bar-fill" id="hp-fill"></div></div>
+        <span class="bar-num" id="hp-num">100</span>
+      </div>
+      <div class="bar-wrap st">
+        <span class="bar-label">СТАМ</span>
+        <div class="bar"><div class="bar-fill" id="stamina-fill"></div></div>
+        <span class="bar-num" id="stamina-num">100</span>
+      </div>
+    </div>
+
+    <div id="hint">WASD — бег · Space — прыжок · ЛКМ — огонь · ПКМ — прицел · R — перезарядка · 1-4 — оружие · M — настройки</div>
+  </div>
+
+  <div id="damage-flash"></div>
+  <div id="death-overlay" class="hidden">
+    <h1>ТЫ УМЕР</h1>
+    <p>Возрождение через <span id="death-timer">3</span>…</p>
+  </div>
+
+  <button id="btn-settings" title="Настройки (M)">⚙</button>
+
+  <div id="settings-panel" class="hidden">
+    <h2>Настройки</h2>
+
+    <div class="setting-row">
+      <span class="label">Качество графики</span>
+      <div class="btn-group">
+        <button data-level="low">Низкое</button>
+        <button data-level="medium">Среднее</button>
+        <button data-level="ultra">Ультра</button>
+      </div>
+    </div>
+
+    <div class="setting-row">
+      <span class="label">Карта</span>
+      <div class="btn-group">
+        <button data-map="desert2">Desert 2</button>
+        <button data-map="wasteland">Пустошь</button>
+      </div>
+    </div>
+
+    <label class="check"><input type="checkbox" id="opt-fps" /> Показывать FPS</label>
+    <label class="check"><input type="checkbox" id="opt-shadows" /> Тени</label>
+
+    <p id="settings-note" class="note"></p>
+    <button id="btn-close-settings" class="primary">Продолжить</button>
+    <button id="btn-exit-menu" class="ghost">Выйти в меню</button>
+  </div>
+
+  <!-- Экран авторизации -->
+  <div id="auth-screen" class="screen hidden">
+    <div class="panel">
+      <h1 class="logo">STRIKE-WEB</h1>
+      <div class="tabs">
+        <button id="tab-login" class="active">Вход</button>
+        <button id="tab-register">Регистрация</button>
+      </div>
+      <form id="auth-form" autocomplete="off">
+        <input id="auth-username" type="text" placeholder="Логин" maxlength="20" />
+        <input id="auth-password" type="password" placeholder="Пароль" />
+        <label class="check"><input type="checkbox" id="auth-remember" /> Запомнить меня</label>
+        <div id="auth-error" class="error"></div>
+        <button id="auth-submit" type="submit" class="primary big">Войти</button>
+      </form>
+      <p id="auth-title" class="sub">ВХОД</p>
+    </div>
+  </div>
+
+  <!-- Главное меню (стиль CS) -->
+  <div id="menu-screen" class="screen hidden">
+    <div class="cs-bg"></div>
+    <div class="cs-top">
+      <div class="cs-logo">STRIKE<span>-WEB</span></div>
+      <div class="cs-user">
+        <span id="menu-online" class="online">●</span>
+        <span id="menu-name" class="cs-name"></span>
+        <span id="menu-coins" class="cs-coins">0 🪙</span>
+      </div>
+    </div>
+    <nav class="cs-nav">
+      <button id="btn-play" class="cs-btn primary">ИГРАТЬ</button>
+      <button id="btn-shop" class="cs-btn">МАГАЗИН</button>
+      <button id="btn-cases" class="cs-btn">КЕЙСЫ</button>
+      <button id="btn-menu-settings" class="cs-btn">НАСТРОЙКИ</button>
+      <button id="btn-logout" class="cs-btn danger">ВЫЙТИ</button>
+    </nav>
+    <div class="cs-footer">
+      <div id="menu-stats" class="cs-stats"></div>
+      <div id="menu-inventory" class="cs-inventory"></div>
+    </div>
+  </div>
+
+  <!-- Кейсы -->
+  <div id="cases-modal" class="screen hidden">
+    <div class="panel wide">
+      <h2 class="logo sm">КЕЙСЫ</h2>
+      <div id="cases-list"></div>
+      <div id="case-result" class="hidden"></div>
+      <button id="btn-close-cases" class="ghost big">Назад</button>
+    </div>
+  </div>
+
+  <!-- Магазин -->
+  <div id="shop-modal" class="screen hidden">
+    <div class="panel wide">
+      <h2 class="logo sm">МАГАЗИН</h2>
+      <div id="shop-coins" class="shop-coins">0 🪙</div>
+      <div id="shop-list"></div>
+      <button id="btn-close-shop" class="ghost big">Назад</button>
+    </div>
+  </div>
+
+  <div id="toast"></div>
+
+  <!-- Оверлей «кликни, чтобы играть» -->
+  <div id="overlay" class="hidden">
+    <div class="overlay-box">
+      <h1 id="overlay-title">STRIKE-WEB</h1>
+      <p id="overlay-hint">Кликни, чтобы играть</p>
+    </div>
+  </div>
+
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>
