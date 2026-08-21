@@ -10,6 +10,7 @@ export const WEAPONS = {
     magSize: 0, reserve: 0,
     spread: 0, recoil: 0,
     sound: 'knife',
+    speedMult: 1.0, // самый лёгкий — полная скорость
   },
   glock: {
     id: 'glock', name: 'Glock-18', slot: 2,
@@ -19,6 +20,7 @@ export const WEAPONS = {
     magSize: 20, reserve: 60,
     spread: 0.006, recoil: 0.005,
     sound: 'pistol',
+    speedMult: 0.96,
   },
   deagle: {
     id: 'deagle', name: 'Desert Eagle', slot: 3,
@@ -28,6 +30,7 @@ export const WEAPONS = {
     magSize: 7, reserve: 28,
     spread: 0.01, recoil: 0.02,
     sound: 'deagle',
+    speedMult: 0.93,
   },
   ak47: {
     id: 'ak47', name: 'AK-47', slot: 4,
@@ -37,6 +40,7 @@ export const WEAPONS = {
     magSize: 30, reserve: 90,
     spread: 0.018, recoil: 0.009,
     sound: 'rifle',
+    speedMult: 0.86, // самый тяжёлый — заметный дебафф скорости
   },
 };
 

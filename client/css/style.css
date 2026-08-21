@@ -117,6 +117,97 @@ html, body {
   text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
 }
 
+/* ---------- HP / Стамина ---------- */
+#vitals {
+  position: absolute;
+  left: 22px;
+  bottom: 22px;
+  z-index: 11;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.bar-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: 'Consolas', monospace;
+}
+
+.bar-label {
+  width: 44px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  color: rgba(255, 255, 255, 0.7);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
+}
+
+.bar {
+  width: 160px;
+  height: 12px;
+  background: rgba(0, 0, 0, 0.55);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.bar-fill {
+  height: 100%;
+  width: 100%;
+  background: #5fbf4f;
+  transition: width 0.12s linear, background 0.2s ease;
+}
+
+.bar-wrap.st .bar-fill { background: #4fb2ff; }
+
+.bar-num {
+  width: 30px;
+  font-size: 12px;
+  font-weight: 700;
+  color: #ffffff;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
+  text-align: right;
+}
+
+/* ---------- Вспышка урона ---------- */
+#damage-flash {
+  position: fixed;
+  inset: 0;
+  z-index: 12;
+  pointer-events: none;
+  opacity: 0;
+  background: radial-gradient(ellipse at center, rgba(255, 0, 0, 0) 40%, rgba(255, 0, 0, 0.6) 100%);
+}
+
+/* ---------- Экран смерти ---------- */
+#death-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: rgba(80, 0, 0, 0.45);
+  color: #ffffff;
+  user-select: none;
+}
+
+#death-overlay h1 {
+  font-size: 56px;
+  letter-spacing: 8px;
+  color: #ff4a3a;
+  text-shadow: 0 0 30px rgba(255, 60, 40, 0.8);
+}
+
+#death-overlay p {
+  margin-top: 14px;
+  font-size: 16px;
+  color: rgba(255, 255, 255, 0.85);
+}
+
 #hint {
   position: absolute;
   bottom: 14px;

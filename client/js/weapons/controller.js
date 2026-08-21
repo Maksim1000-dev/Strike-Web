@@ -49,6 +49,9 @@ export class WeaponController {
     this.recoilPitch = 0;
     this.kick = 0;
 
+    this.player = null;   // ссылка на контроллер игрока (для ADS)
+    this.onSwitch = null; // вызывается при смене оружия
+
     this._applyVisible();
     this._updateHud();
   }
@@ -69,6 +72,7 @@ export class WeaponController {
     this.sound.ensure();
     this.sound.switchSound();
     this._updateHud();
+    if (this.onSwitch) this.onSwitch();
   }
 
   cycle(dir) {
@@ -123,7 +127,9 @@ export class WeaponController {
   }
 
   _shoot(d) {
-    const spread = d.spread + this.recoilPitch * 3;
+    const aiming = this.player && this.player.aiming;
+    const baseSpread = aiming ? d.spread * 0.12 : d.spread; // в прицеле почти точно
+    const spread = baseSpread + this.recoilPitch * 3;
     this.camera.getWorldDirection(_dir);
     _dir.x += (Math.random() - 0.5) * spread;
     _dir.y += (Math.random() - 0.5) * spread;
@@ -175,6 +181,11 @@ export class WeaponController {
   update(dt, moving) {
     this.time += dt;
 
+    // Прячем оружие, если игрок мёртв.
+    if (this.player && this.player.stats) {
+      this.viewmodel.visible = this.player.stats.alive;
+    }
+
     if (this.reloading) {
       this.reloadT -= dt;
       if (this.reloadT <= 0) this._finishReload();
@@ -212,10 +223,11 @@ export class WeaponController {
 
   _updateViewmodel(moving) {
     const t = this.time;
-    const swayX = Math.sin(t * 1.4) * 0.004;
-    const swayY = Math.sin(t * 1.1) * 0.003;
-    let x = 0.32 + swayX + (moving ? -0.02 : 0);
-    let y = -0.3 + swayY + (moving ? -0.015 : 0);
+    const aiming = this.player && this.player.aiming;
+    const swayX = aiming ? 0 : Math.sin(t * 1.4) * 0.004;
+    const swayY = aiming ? 0 : Math.sin(t * 1.1) * 0.003;
+    let x = aiming ? 0 : 0.32 + swayX + (moving ? -0.02 : 0);
+    let y = aiming ? -0.265 : -0.3 + swayY + (moving ? -0.015 : 0);
     let z = -0.55 + this.kick;
     let rx = 0;
     if (this.reloading) {

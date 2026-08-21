@@ -35,7 +35,27 @@
     </div>
     <div id="reload-hint">ПЕРЕЗАРЯДКА…</div>
 
-    <div id="hint">WASD — бег · Space — прыжок · ЛКМ — огонь · R — перезарядка · 1-4 — оружие · M — настройки</div>
+    <div id="vitals">
+      <div class="bar-wrap hp">
+        <span class="bar-label">HP</span>
+        <div class="bar"><div class="bar-fill" id="hp-fill"></div></div>
+        <span class="bar-num" id="hp-num">100</span>
+      </div>
+      <div class="bar-wrap st">
+        <span class="bar-label">СТАМ</span>
+        <div class="bar"><div class="bar-fill" id="stamina-fill"></div></div>
+        <span class="bar-num" id="stamina-num">100</span>
+      </div>
+    </div>
+
+    <div id="hint">WASD — бег · Space — прыжок · ЛКМ — огонь · ПКМ — прицел · R — перезарядка · 1-4 — оружие · M — настройки</div>
+  </div>
+
+  <div id="damage-flash"></div>
+
+  <div id="death-overlay" class="hidden">
+    <h1>ТЫ УМЕР</h1>
+    <p>Возрождение через <span id="death-timer">3</span>…</p>
   </div>
 
   <button id="btn-settings" title="Настройки (M)">⚙</button>
