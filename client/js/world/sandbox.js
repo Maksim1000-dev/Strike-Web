@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { makeGroundTexture, makeSandTexture } from '../graphics/textures.js';
+import { makeGroundTexture, makeSandTexture, makeCorrugatedMetalTexture, loadTexture, TEXTURE_PATHS } from '../graphics/textures.js';
 import { buildGrass } from './grass.js';
 import { buildCacti } from './cacti.js';
 import { graphics } from '../config.js';
@@ -68,6 +68,12 @@ export function buildSandbox(scene) {
   // --- Препятствия (ящики и колонны) ---
   const crateMat = new THREE.MeshStandardMaterial({ color: 0xc08a4a, roughness: 0.8 });
   const darkMat = new THREE.MeshStandardMaterial({ color: 0x7a6a52, roughness: 0.85 });
+  // Профнастил генерируется процедурно — контейнеры/панели.
+  const metalMat = new THREE.MeshStandardMaterial({
+    map: makeCorrugatedMetalTexture(graphics.level),
+    roughness: 0.45,
+    metalness: 0.85,
+  });
 
   const box = (x, z, w, h, d, mat) => {
     const mesh = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), mat);
@@ -94,16 +100,50 @@ export function buildSandbox(scene) {
   box(-16, -12, 3, 10, 3, crateMat);
   box(16, 12, 3, 10, 3, darkMat);
 
+  // Контейнер из профнастила — превью процедурного металла (заготовка под Часть 3).
+  box(6, 3, 3, 2.4, 6, metalMat);
+
+  // --- Реальные текстуры (Medium/Ultra) с процедурным fallback ---
+  const applyGroundTexture = (level) => {
+    ground.material.map = makeGroundTexture(level);
+    ground.material.needsUpdate = true;
+    if (level === 'low') return;
+    loadTexture(TEXTURE_PATHS.grass).then((tex) => {
+      if (tex && graphics.level !== 'low') {
+        tex.repeat.set(24, 24);
+        ground.material.map = tex;
+        ground.material.needsUpdate = true;
+      }
+    });
+  };
+
+  const applySandTexture = (level) => {
+    sandMat.map = makeSandTexture(level);
+    sandMat.needsUpdate = true;
+    if (level === 'low') return;
+    loadTexture(TEXTURE_PATHS.sand).then((tex) => {
+      if (tex && graphics.level !== 'low') {
+        tex.repeat.set(4, 4);
+        sandMat.map = tex;
+        sandMat.needsUpdate = true;
+      }
+    });
+  };
+
+  // Сразу грузим реальные текстуры под текущий пресет.
+  applyGroundTexture(graphics.level);
+  applySandTexture(graphics.level);
+
   // --- Трава и кактусы ---
   world.grass = buildGrass(scene, { count: graphics.level === 'low' ? 0 : 4500 });
   world.cacti = buildCacti(scene, [[-8, -6], [-6.2, -4.2], [11, -9], [13, -7.2], [13, 7], [15, 8.2]]);
 
   // Применение настроек графики к этой сцене.
   world.applyGraphics = (g) => {
-    ground.material.map = makeGroundTexture(g.level);
-    ground.material.needsUpdate = true;
-    sandMat.map = makeSandTexture(g.level);
-    sandMat.needsUpdate = true;
+    applyGroundTexture(g.level);
+    applySandTexture(g.level);
+    metalMat.map = makeCorrugatedMetalTexture(g.level);
+    metalMat.needsUpdate = true;
     grid.visible = g.level !== 'ultra';
     world.grass.setWind(g.grassWind);
     world.cacti.setSway(g.grassWind);

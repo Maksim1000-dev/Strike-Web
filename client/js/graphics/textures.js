@@ -135,3 +135,96 @@ export function makeSandTexture(level, repeat = 8) {
   tex.repeat.set(repeat, repeat);
   return tex;
 }
+
+// --- Реальные текстуры из client/assets/textures/ ---
+// Medium/Ultra используют загруженные файлы; если файла нет — вернём null и подставим процедурную.
+
+export const TEXTURE_PATHS = {
+  grass: '/assets/textures/ground/grass_diffuse.png',
+  grunt: '/assets/textures/ground/grunt_diffuse.png',
+  sand: '/assets/textures/ground/sand_diffuse.png',
+};
+
+const loaderCache = new Map();
+
+export function loadTexture(path) {
+  if (loaderCache.has(path)) return loaderCache.get(path);
+  const promise = new Promise((resolve) => {
+    const loader = new THREE.TextureLoader();
+    loader.setCrossOrigin('anonymous');
+    loader.load(
+      path,
+      (tex) => {
+        tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
+        tex.colorSpace = THREE.SRGBColorSpace;
+        tex.anisotropy = 4;
+        resolve(tex);
+      },
+      undefined,
+      () => resolve(null) // не загрузилась — используем процедурную
+    );
+  });
+  loaderCache.set(path, promise);
+  return promise;
+}
+
+// Профнастил (гофрированный металл) — генерируется процедурно.
+// Вертикальные рёбра трапециевидного профиля + лёгкая «сталь» и полосы износа.
+// Бесшовный: профиль строится по фазе u * ridges, поэтому края текстуры сходятся.
+export function makeCorrugatedMetalTexture(level, repeat = 4) {
+  const p = PRESETS[level];
+  const rand = mulberry32(71);
+  const canvas = document.createElement('canvas');
+  canvas.width = canvas.height = p.size;
+  const ctx = canvas.getContext('2d');
+  const img = ctx.createImageData(p.size, p.size);
+  const data = img.data;
+
+  const ridges = level === 'low' ? 5 : level === 'medium' ? 12 : 22; // число рёбер на текстуру
+  const flat = 0.22;   // доля плоской вершины ребра
+  const slope = 0.16;  // доля скоса
+
+  const ridgeProfile = (t) => {
+    if (t < flat) return 1.0;
+    if (t < flat + slope) return 1.0 - (t - flat) / slope;
+    if (t < 1 - flat - slope) return 0.0;
+    if (t < 1 - flat) return (t - (1 - flat - slope)) / slope;
+    return 1.0;
+  };
+
+  for (let y = 0; y < p.size; y++) {
+    const v = y / p.size;
+    for (let x = 0; x < p.size; x++) {
+      const u = x / p.size;
+      const phase = u * ridges;
+      const t = phase - Math.floor(phase);
+      const ridge = ridgeProfile(t);
+
+      // Стальной цвет: тёмный в желобе, светлый на вершине ребра.
+      let luma = 0.42 + 0.5 * ridge;
+
+      // Периодические полосы износа + зернистость (бесшовные).
+      luma += Math.sin(u * Math.PI * 2 * 2) * 0.03;
+      luma += Math.sin(v * Math.PI * 2 * 5) * 0.02;
+      luma += (rand() - 0.5) * 0.07;
+
+      luma = Math.max(0, Math.min(1, luma));
+      const r = luma * 0.80 * 255;
+      const g = luma * 0.83 * 255;
+      const b = luma * 0.90 * 255;
+
+      const i = (y * p.size + x) * 4;
+      data[i] = r;
+      data[i + 1] = g;
+      data[i + 2] = b;
+      data[i + 3] = 255;
+    }
+  }
+  ctx.putImageData(img, 0, 0);
+
+  const tex = new THREE.CanvasTexture(canvas);
+  tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
+  tex.colorSpace = THREE.SRGBColorSpace;
+  tex.repeat.set(repeat, repeat);
+  return tex;
+}
