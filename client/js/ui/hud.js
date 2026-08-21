@@ -21,10 +21,20 @@ export class HUD {
     this.damageEl = document.getElementById('damage-flash');
     this.deathEl = document.getElementById('death-overlay');
     this.deathTimerEl = document.getElementById('death-timer');
+    this.toastEl = document.getElementById('toast');
 
     this._hmTimer = null;
     this._damageTimer = null;
+    this._toastTimer = null;
     this.inGame = false; // в меню оверлей принудительно скрыт
+  }
+
+  flashMessage(msg) {
+    if (!this.toastEl) return;
+    this.toastEl.textContent = msg;
+    this.toastEl.style.opacity = '1';
+    clearTimeout(this._toastTimer);
+    this._toastTimer = setTimeout(() => { this.toastEl.style.opacity = '0'; }, 1400);
   }
 
   setInGame(v) {

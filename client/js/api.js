@@ -28,6 +28,8 @@ export const Auth = {
   me: () => api('/api/me'),
   cases: () => api('/api/cases'),
   openCase: (caseId) => api('/api/case/open', { method: 'POST', body: { caseId } }),
+  shop: () => api('/api/shop'),
+  buy: (weaponId) => api('/api/buy', { method: 'POST', body: { weaponId } }),
 };
 
 // localStorage: запоминаем последний логин для удобства.

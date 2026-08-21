@@ -61,6 +61,7 @@ export function buildWasteland(scene) {
   ground.receiveShadow = true;
   scene.add(ground);
   world.meshes.push(ground);
+  world.bulletTargets.push(ground);
   world.ground = ground;
 
   // Грунтовые тропы
@@ -71,6 +72,7 @@ export function buildWasteland(scene) {
     patch.receiveShadow = true;
     scene.add(patch);
     world.meshes.push(patch);
+    world.bulletTargets.push(patch);
   }
 
   // Граница поля (низкий забор, не перепрыгнуть)

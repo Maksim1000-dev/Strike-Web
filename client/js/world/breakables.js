@@ -83,6 +83,7 @@ export class GlassPane {
     this.mesh.castShadow = false;
     scene.add(this.mesh);
     if (world && world.meshes) world.meshes.push(this.mesh);
+    if (world && world.bulletTargets) world.bulletTargets.push(this.mesh);
     this.broken = false;
   }
 
@@ -93,5 +94,7 @@ export class GlassPane {
     this.scene.remove(this.mesh);
     const i = this.world && this.world.meshes ? this.world.meshes.indexOf(this.mesh) : -1;
     if (i >= 0) this.world.meshes.splice(i, 1);
+    const j = this.world && this.world.bulletTargets ? this.world.bulletTargets.indexOf(this.mesh) : -1;
+    if (j >= 0) this.world.bulletTargets.splice(j, 1);
   }
 }

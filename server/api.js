@@ -6,9 +6,11 @@ import {
   destroySession,
   getSessionUser,
   addCoins,
+  addWeapon,
   addToInventory,
 } from './store.js';
 import { CASES, RARITY, rollCase } from './cases.js';
+import { SHOP } from './shop.js';
 
 const COOKIE_NAME = 'strike_session';
 
@@ -83,6 +85,30 @@ export async function handleApi(req, res, url, body) {
       const coins = addCoins(u.username, -c.cost);
       const entry = addToInventory(u.username, item);
       return json(res, 200, { item: entry, coins, rarity: RARITY[item.rarity] });
+    }
+
+    if (method === 'GET' && path === '/api/shop') {
+      const u = getSessionUser(cookies[COOKIE_NAME]);
+      if (!u) return json(res, 401, { error: 'Не авторизован' });
+      const owned = u.weapons || ['knife'];
+      return json(res, 200, {
+        shop: SHOP.map((s) => ({ ...s, owned: owned.includes(s.id) })),
+        coins: u.coins,
+      });
+    }
+
+    if (method === 'POST' && path === '/api/buy') {
+      const u = getSessionUser(cookies[COOKIE_NAME]);
+      if (!u) return json(res, 401, { error: 'Не авторизован' });
+      const item = SHOP.find((s) => s.id === body.weaponId);
+      if (!item) return json(res, 404, { error: 'Оружие не найдено' });
+      const owned = u.weapons || ['knife'];
+      if (owned.includes(item.id)) return json(res, 400, { error: 'Уже куплено' });
+      if (u.coins < item.price) return json(res, 400, { error: 'Недостаточно монет' });
+
+      addWeapon(u.username, item.id);
+      const coins = addCoins(u.username, -item.price);
+      return json(res, 200, { weapon: item.id, coins, weapons: u.weapons });
     }
 
     return json(res, 404, { error: 'Not found' });

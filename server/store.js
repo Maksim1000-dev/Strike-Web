@@ -67,6 +67,7 @@ export function publicUser(u) {
     coins: u.coins,
     kills: u.kills,
     deaths: u.deaths,
+    weapons: u.weapons || ['knife'],
     inventory: u.inventory || [],
   };
 }
@@ -89,6 +90,7 @@ export function registerUser(username, password) {
     coins: 1000, // стартовый капитал
     kills: 0,
     deaths: 0,
+    weapons: ['knife'], // оружие покупается; нож — бесплатно
     inventory: [],
     createdAt: Date.now(),
   };
@@ -146,6 +148,17 @@ export function addKill(username) {
 export function addDeath(username) {
   const u = users[username];
   if (u) { u.deaths++; save(); }
+}
+
+export function addWeapon(username, id) {
+  const u = users[username];
+  if (!u) return null;
+  if (!Array.isArray(u.weapons)) u.weapons = ['knife'];
+  if (!u.weapons.includes(id)) {
+    u.weapons.push(id);
+    save();
+  }
+  return u.weapons;
 }
 
 export function addToInventory(username, item) {

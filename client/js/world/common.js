@@ -10,7 +10,8 @@ export function createWorld(scene, opts = {}) {
     colliders: [],
     breakables: [],
     spawn: new THREE.Vector3(...(opts.spawn || [0, 1.7, 16])),
-    meshes: [],              // геометрия (для рейкаста и освобождения)
+    meshes: [],              // вся геометрия (для освобождения при смене карты)
+    bulletTargets: [],       // то, во что попадают пули (без травы/кактусов — быстрее рейкаст)
     lights: [],              // источники света (без raycast)
     proceduralTextures: [],  // процедурные текстуры этой карты (dispose при смене)
     updateEffects: null,
@@ -62,6 +63,7 @@ export function addBox(world, scene, { x = 0, y = 0, z = 0, w = 1, h = 1, d = 1,
   mesh.receiveShadow = receiveShadow;
   scene.add(mesh);
   world.meshes.push(mesh);
+  world.bulletTargets.push(mesh);
   world.colliders.push({
     min: new THREE.Vector3(x - w / 2, y, z - d / 2),
     max: new THREE.Vector3(x + w / 2, y + h, z + d / 2),

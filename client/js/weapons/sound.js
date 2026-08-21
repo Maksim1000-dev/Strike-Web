@@ -3,6 +3,7 @@ export class SoundFX {
   constructor() {
     this.ctx = null;
     this.master = null;
+    this._noiseCache = new Map();
   }
 
   ensure() {
@@ -20,10 +21,14 @@ export class SoundFX {
   }
 
   _noise(dur) {
+    // Кэшируем шумовые буферы — не аллоцируем новый буфер на каждый выстрел.
+    const key = Math.round(dur * 1000);
+    if (this._noiseCache.has(key)) return this._noiseCache.get(key);
     const len = Math.floor(this.ctx.sampleRate * dur);
     const buf = this.ctx.createBuffer(1, len, this.ctx.sampleRate);
     const d = buf.getChannelData(0);
     for (let i = 0; i < len; i++) d[i] = Math.random() * 2 - 1;
+    this._noiseCache.set(key, buf);
     return buf;
   }
 

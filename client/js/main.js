@@ -6,6 +6,7 @@ import { SettingsPanel } from './ui/settings.js';
 import { AuthScreen } from './ui/auth.js';
 import { MenuScreen } from './ui/menu.js';
 import { CasesModal } from './ui/cases.js';
+import { ShopModal } from './ui/shop.js';
 import { PostFX } from './graphics/postfx.js';
 import { graphics, detectLevel, applyGraphicsLevel } from './config.js';
 import { MAPS } from './world/maps/index.js';
@@ -70,6 +71,7 @@ function loadMap(name) {
   }
   weapon.setWorld(world);
   weapon.clearEffects();
+  weapon.setOwned(currentUser ? currentUser.weapons : ['knife']);
   weapon.player = player;
   weapon.remoteTargetsProvider = () => remote.hitMeshes;
   weapon.onPlayerHit = (rid, dmg, w) => net.sendHit(rid, dmg, w);
@@ -88,6 +90,8 @@ function loadMap(name) {
   hud.setMap(entry.name);
 }
 ctx.loadMap = loadMap;
+
+const settings = new SettingsPanel(ctx);
 
 // ---------- Сеть ----------
 net.on('welcome', (m) => {
@@ -135,7 +139,9 @@ const auth = new AuthScreen({
 
 const menu = new MenuScreen({
   onPlay: () => enterGame(),
+  onShop: () => shop.open(),
   onCases: () => cases.open(),
+  onSettings: () => settings.setOpen(true),
   onLogout: async () => {
     try { await Auth.logout(); } catch { /* ignore */ }
     currentUser = null;
@@ -151,11 +157,25 @@ const cases = new CasesModal({
   },
 });
 
+const shop = new ShopModal({
+  hud,
+  onCoins: (coins) => {
+    if (currentUser) currentUser.coins = coins;
+    menu.updateCoins(coins);
+  },
+  onBought: (weapons) => {
+    if (currentUser) currentUser.weapons = weapons;
+    if (weapon) weapon.setOwned(weapons);
+    if (currentUser) menu.render(currentUser, online);
+  },
+});
+
 function showAuth() {
   phase = 'auth';
   hud.setInGame(false);
   menu.hide();
   cases.hide();
+  shop.hide();
   auth.show();
 }
 
@@ -174,6 +194,7 @@ async function showMenu() {
   hud.setInGame(false);
   auth.hide();
   cases.hide();
+  shop.hide();
   menu.show(currentUser, online);
   // Обновляем профиль (монеты могли измениться за игру).
   try {
@@ -188,6 +209,7 @@ async function enterGame() {
   auth.hide();
   menu.hide();
   cases.hide();
+  shop.hide();
   hud.setInGame(true);
 
   if (!world) loadMap('desert2');
@@ -215,7 +237,7 @@ const WEAPON_KEYS = { Digit1: 'knife', Digit2: 'glock', Digit3: 'deagle', Digit4
 
 document.addEventListener('mousedown', (e) => {
   if (e.button !== 0) return;
-  if (e.target instanceof Element && e.target.closest('#btn-settings, #settings-panel, #auth-screen, #menu-screen, #cases-modal')) return;
+  if (e.target instanceof Element && e.target.closest('#btn-settings, #settings-panel, #auth-screen, #menu-screen, #cases-modal, #shop-modal')) return;
   if (phase !== 'game' || !player || !player.playing || !weapon || !stats.alive) return;
   weapon.setTriggerHeld(true);
   weapon.tryFire();

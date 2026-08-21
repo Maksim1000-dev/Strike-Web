@@ -43,6 +43,7 @@ export function buildDesert2(scene) {
   ground.receiveShadow = true;
   scene.add(ground);
   world.meshes.push(ground);
+  world.bulletTargets.push(ground);
   world.ground = ground;
 
   // Внешние стены (периметр)
