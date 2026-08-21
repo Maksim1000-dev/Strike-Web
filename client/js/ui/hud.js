@@ -6,10 +6,15 @@ export class HUD {
     this.overlayTitle = document.getElementById('overlay-title');
     this.overlayHint = document.getElementById('overlay-hint');
     this.hintEl = document.getElementById('hint');
+    this.mapEl = document.getElementById('map');
   }
 
   setFps(v) {
     if (this.fpsEl) this.fpsEl.textContent = `${v} FPS`;
+  }
+
+  setMap(name) {
+    if (this.mapEl) this.mapEl.textContent = name;
   }
 
   applyGraphics(g) {

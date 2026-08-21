@@ -19,8 +19,9 @@
 
   <div id="hud">
     <div id="fps">-- FPS</div>
+    <div id="map">Desert 2</div>
     <div id="crosshair"></div>
-    <div id="hint">WASD — движение · Space — прыжок · Shift — бег · M — настройки</div>
+    <div id="hint">WASD — движение · Space — прыжок · Shift — бег · ЛКМ — разбить стекло · 1/2 — карты · M — настройки</div>
   </div>
 
   <button id="btn-settings" title="Настройки (M)">⚙</button>
@@ -30,10 +31,18 @@
 
     <div class="setting-row">
       <span class="label">Качество графики</span>
-      <div class="quality-btns">
+      <div class="btn-group">
         <button data-level="low">Низкое</button>
         <button data-level="medium">Среднее</button>
         <button data-level="ultra">Ультра</button>
+      </div>
+    </div>
+
+    <div class="setting-row">
+      <span class="label">Карта</span>
+      <div class="btn-group">
+        <button data-map="desert2">Desert 2</button>
+        <button data-map="wasteland">Пустошь</button>
       </div>
     </div>
 

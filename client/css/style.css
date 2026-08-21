@@ -33,6 +33,17 @@ html, body {
   text-shadow: 0 0 4px rgba(0, 0, 0, 0.7);
 }
 
+#map {
+  position: absolute;
+  top: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  color: rgba(255, 255, 255, 0.85);
+  font: 600 14px/1 'Consolas', monospace;
+  letter-spacing: 1px;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
+}
+
 #crosshair {
   position: absolute;
   top: 50%;
@@ -112,9 +123,9 @@ html, body {
   letter-spacing: 0.5px;
 }
 
-.quality-btns { display: flex; gap: 8px; }
+.btn-group { display: flex; gap: 8px; }
 
-.quality-btns button {
+.btn-group button {
   flex: 1;
   padding: 10px 8px;
   border: 1px solid rgba(255, 255, 255, 0.16);
@@ -126,9 +137,9 @@ html, body {
   transition: all 0.15s ease;
 }
 
-.quality-btns button:hover { background: rgba(255, 255, 255, 0.1); }
+.btn-group button:hover { background: rgba(255, 255, 255, 0.1); }
 
-.quality-btns button.active {
+.btn-group button.active {
   background: #ffb43a;
   border-color: #ffb43a;
   color: #16120a;

@@ -229,3 +229,72 @@ export function makeCorrugatedMetalTexture(level, repeat = 4) {
   tex.repeat.set(repeat, repeat);
   return tex;
 }
+
+// Бетон — процедурный (fallback для real-текстуры beton).
+export function makeConcreteTexture(level, repeat = 3) {
+  const stops = [
+    [168, 166, 160],
+    [150, 148, 142],
+    [180, 178, 172],
+    [158, 156, 150],
+  ];
+  const tex = makeTexture(level, 53, stops, level === 'low' ? 0 : 6);
+  tex.repeat.set(repeat, repeat);
+  return tex;
+}
+
+// Грунт — процедурный (fallback для real-текстуры grunt).
+export function makeDirtTexture(level, repeat = 8) {
+  const stops = [
+    [110, 84, 58],
+    [94, 70, 48],
+    [124, 98, 70],
+    [102, 78, 54],
+  ];
+  const tex = makeTexture(level, 59, stops, level === 'low' ? 0 : 9);
+  tex.repeat.set(repeat, repeat);
+  return tex;
+}
+
+// Дерево (доски) — процедурное: зерно вдоль X + доски со швами.
+export function makeWoodTexture(level, repeat = 2) {
+  const p = PRESETS[level];
+  const noise = makeValueNoise(41);
+  const rand = mulberry32(41);
+  const canvas = document.createElement('canvas');
+  canvas.width = canvas.height = p.size;
+  const ctx = canvas.getContext('2d');
+  const img = ctx.createImageData(p.size, p.size);
+  const data = img.data;
+
+  const planks = level === 'low' ? 4 : level === 'medium' ? 8 : 12;
+  const plankH = p.size / planks;
+  const plankShade = [];
+  for (let i = 0; i < planks; i++) plankShade[i] = 0.78 + rand() * 0.3;
+
+  for (let y = 0; y < p.size; y++) {
+    const pi = Math.min(planks - 1, Math.floor(y / plankH));
+    const shade = plankShade[pi];
+    const seam = (y % plankH) < (level === 'low' ? 2 : 1.5);
+    for (let x = 0; x < p.size; x++) {
+      const grain = fbm(noise, x * 0.012, y * 0.06, 3); // зерно вдоль X
+      const streak = Math.sin(x * 0.02 + grain * 6) * 8; // прожилки
+      let r = 128 * shade + grain * 36 + streak;
+      let g = 84 * shade + grain * 22 + streak;
+      let b = 52 * shade + grain * 12 + streak;
+      if (seam) { r *= 0.5; g *= 0.46; b *= 0.4; }
+      const i = (y * p.size + x) * 4;
+      data[i] = Math.max(0, Math.min(255, r));
+      data[i + 1] = Math.max(0, Math.min(255, g));
+      data[i + 2] = Math.max(0, Math.min(255, b));
+      data[i + 3] = 255;
+    }
+  }
+  ctx.putImageData(img, 0, 0);
+
+  const tex = new THREE.CanvasTexture(canvas);
+  tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
+  tex.colorSpace = THREE.SRGBColorSpace;
+  tex.repeat.set(repeat, repeat);
+  return tex;
+}

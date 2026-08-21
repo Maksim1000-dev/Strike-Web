@@ -8,6 +8,7 @@ export class SettingsPanel {
     this.btnOpen = document.getElementById('btn-settings');
     this.btnClose = document.getElementById('btn-close-settings');
     this.qualityBtns = Array.from(document.querySelectorAll('[data-level]'));
+    this.mapBtns = Array.from(document.querySelectorAll('[data-map]'));
     this.fpsToggle = document.getElementById('opt-fps');
     this.shadowsToggle = document.getElementById('opt-shadows');
     this.note = document.getElementById('settings-note');
@@ -24,6 +25,13 @@ export class SettingsPanel {
     this.qualityBtns.forEach((btn) => {
       btn.addEventListener('click', () => {
         applyGraphicsLevel(btn.dataset.level, this.ctx);
+        this.refresh();
+      });
+    });
+
+    this.mapBtns.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        if (this.ctx.loadMap) this.ctx.loadMap(btn.dataset.map);
         this.refresh();
       });
     });
@@ -57,6 +65,9 @@ export class SettingsPanel {
   refresh() {
     this.qualityBtns.forEach((btn) => {
       btn.classList.toggle('active', btn.dataset.level === graphics.level);
+    });
+    this.mapBtns.forEach((btn) => {
+      btn.classList.toggle('active', btn.dataset.map === (this.ctx.currentMap || ''));
     });
     this.fpsToggle.checked = graphics.showFps;
     this.shadowsToggle.checked = graphics.shadows;
