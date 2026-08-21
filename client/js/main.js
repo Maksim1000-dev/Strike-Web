@@ -21,7 +21,7 @@ const postfx = new PostFX(engine.renderer, engine.scene, engine.camera);
 engine.setPlayer(player);
 engine.setPostfx(postfx);
 
-const ctx = { engine, world, postfx, hud };
+const ctx = { engine, world, postfx, hud, player };
 
 // Применяем пресет к уже построенной сцене (текстуры, трава, bloom).
 applyGraphicsLevel(graphics.level, ctx);

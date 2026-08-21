@@ -48,7 +48,8 @@ export class SettingsPanel {
     this.open = open;
     this.panel.classList.toggle('hidden', !open);
     if (open) {
-      if (document.pointerLockElement) document.exitPointerLock();
+      // Отпускаем курсор и выходим в меню, чтобы панелью можно было пользоваться.
+      if (this.ctx.player) this.ctx.player.release();
       this.refresh();
     }
   }

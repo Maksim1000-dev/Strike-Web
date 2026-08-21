@@ -1,10 +1,11 @@
-// HUD: счётчик FPS и стартовый оверлей (захват курсора).
+// HUD: счётчик FPS и стартовый оверлей (захват курсора / вход в игру).
 export class HUD {
   constructor() {
     this.fpsEl = document.getElementById('fps');
     this.overlayEl = document.getElementById('overlay');
     this.overlayTitle = document.getElementById('overlay-title');
     this.overlayHint = document.getElementById('overlay-hint');
+    this.hintEl = document.getElementById('hint');
   }
 
   setFps(v) {
@@ -15,16 +16,24 @@ export class HUD {
     if (this.fpsEl) this.fpsEl.style.display = g.showFps ? '' : 'none';
   }
 
-  setLocked(locked, pointerLockUnavailable) {
+  // playing=true — курсор захвачен (или включён fallback), оверлей скрыт.
+  setPlaying(playing, pointerLockUnavailable) {
     if (!this.overlayEl) return;
-    if (locked) {
+    if (playing) {
       this.overlayEl.classList.add('hidden');
+      if (this.hintEl) {
+        this.hintEl.textContent = pointerLockUnavailable
+          ? 'WASD — движение · Space — прыжок · Shift — бег · осмотр — зажатая мышь · M — настройки'
+          : 'WASD — движение · Space — прыжок · Shift — бег · M — настройки';
+      }
     } else {
       this.overlayEl.classList.remove('hidden');
-      this.overlayTitle.textContent = 'STRIKE-WEB';
-      this.overlayHint.textContent = pointerLockUnavailable
-        ? 'Pointer Lock недоступен — зажми мышь и веди, чтобы осмотреться'
-        : 'Кликни, чтобы играть (WASD — движение · Space — прыжок · Shift — бег · M — настройки)';
+      if (this.overlayTitle) this.overlayTitle.textContent = 'STRIKE-WEB';
+      if (this.overlayHint) {
+        this.overlayHint.textContent = pointerLockUnavailable
+          ? 'Кликни, чтобы играть (обзор — зажми мышь и веди)'
+          : 'Кликни, чтобы играть (WASD — движение · Space — прыжок · Shift — бег · M — настройки)';
+      }
     }
   }
 }
