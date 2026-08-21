@@ -143,6 +143,7 @@ export const TEXTURE_PATHS = {
   grass: '/assets/textures/ground/grass_diffuse.png',
   grunt: '/assets/textures/ground/grunt_diffuse.png',
   sand: '/assets/textures/ground/sand_diffuse.png',
+  beton: '/assets/textures/buildings/beton_diffuse.png',
 };
 
 const loaderCache = new Map();

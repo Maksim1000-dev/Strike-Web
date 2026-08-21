@@ -74,6 +74,8 @@ export function buildSandbox(scene) {
     roughness: 0.45,
     metalness: 0.85,
   });
+  // Бетон — реальная текстура в Medium/Ultra, плоский серый в Low.
+  const concreteMat = new THREE.MeshStandardMaterial({ color: 0x9a9891, roughness: 0.9, metalness: 0 });
 
   const box = (x, z, w, h, d, mat) => {
     const mesh = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), mat);
@@ -103,6 +105,9 @@ export function buildSandbox(scene) {
   // Контейнер из профнастила — превью процедурного металла (заготовка под Часть 3).
   box(6, 3, 3, 2.4, 6, metalMat);
 
+  // Бетонная стена — превью текстуры бетона (стены многоэтажек, Часть 3).
+  box(-7, 5, 0.6, 4, 6, concreteMat);
+
   // --- Реальные текстуры (Medium/Ultra) с процедурным fallback ---
   const applyGroundTexture = (level) => {
     ground.material.map = makeGroundTexture(level);
@@ -130,9 +135,24 @@ export function buildSandbox(scene) {
     });
   };
 
+  const applyConcreteTexture = (level) => {
+    concreteMat.map = null;
+    concreteMat.color.set(0x9a9891);
+    concreteMat.needsUpdate = true;
+    if (level === 'low') return;
+    loadTexture(TEXTURE_PATHS.beton).then((tex) => {
+      if (tex && graphics.level !== 'low') {
+        tex.repeat.set(2, 2);
+        concreteMat.map = tex;
+        concreteMat.needsUpdate = true;
+      }
+    });
+  };
+
   // Сразу грузим реальные текстуры под текущий пресет.
   applyGroundTexture(graphics.level);
   applySandTexture(graphics.level);
+  applyConcreteTexture(graphics.level);
 
   // --- Трава и кактусы ---
   world.grass = buildGrass(scene, { count: graphics.level === 'low' ? 0 : 4500 });
@@ -142,6 +162,7 @@ export function buildSandbox(scene) {
   world.applyGraphics = (g) => {
     applyGroundTexture(g.level);
     applySandTexture(g.level);
+    applyConcreteTexture(g.level);
     metalMat.map = makeCorrugatedMetalTexture(g.level);
     metalMat.needsUpdate = true;
     grid.visible = g.level !== 'ultra';
