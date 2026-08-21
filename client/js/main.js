@@ -159,6 +159,16 @@ function showAuth() {
   auth.show();
 }
 
+// Если сессия «протухла» (сервер перезапустился) — мягко возвращаем на вход.
+window.addEventListener('auth:expired', () => {
+  if (phase === 'auth') return;
+  currentUser = null;
+  net.close();
+  if (player) player.release();
+  if (weapon) weapon.setTriggerHeld(false);
+  showAuth();
+});
+
 async function showMenu() {
   phase = 'menu';
   hud.setInGame(false);

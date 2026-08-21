@@ -6,12 +6,16 @@ import { fileURLToPath } from 'node:url';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const DATA_DIR = path.join(__dirname, 'data');
 const USERS_FILE = path.join(DATA_DIR, 'players.json');
+const SESSIONS_FILE = path.join(DATA_DIR, 'sessions.json');
 
-// Хранилище игроков: JSON-файл на диске + сессии в памяти (cookie-token → username).
+// Хранилище игроков: JSON-файлы на диске. Сессии тоже на диске — чтобы вход
+// переживал перезапуск сервера (в памяти они бы «сгорали»).
 let users = {};
 const sessions = new Map(); // token -> { username, expires }
 
 export function initStore() {
+  fs.mkdirSync(DATA_DIR, { recursive: true });
+
   try {
     if (fs.existsSync(USERS_FILE)) {
       users = JSON.parse(fs.readFileSync(USERS_FILE, 'utf8'));
@@ -19,7 +23,29 @@ export function initStore() {
   } catch {
     users = {};
   }
-  fs.mkdirSync(DATA_DIR, { recursive: true });
+
+  try {
+    if (fs.existsSync(SESSIONS_FILE)) {
+      const raw = JSON.parse(fs.readFileSync(SESSIONS_FILE, 'utf8'));
+      const now = Date.now();
+      for (const [token, s] of Object.entries(raw)) {
+        if (s && s.expires > now) sessions.set(token, s);
+      }
+    }
+  } catch {
+    /* пустой файл сессий — ок */
+  }
+}
+
+function saveSessions() {
+  try {
+    fs.mkdirSync(DATA_DIR, { recursive: true });
+    const obj = {};
+    for (const [token, s] of sessions.entries()) obj[token] = s;
+    fs.writeFileSync(SESSIONS_FILE, JSON.stringify(obj));
+  } catch {
+    /* не критично — сессии просто останутся в памяти */
+  }
 }
 
 function save() {
@@ -84,6 +110,7 @@ export function getUser(username) {
 export function createSession(username) {
   const token = makeToken();
   sessions.set(token, { username, expires: Date.now() + 7 * 24 * 3600 * 1000 });
+  saveSessions();
   return token;
 }
 
@@ -93,13 +120,14 @@ export function getSessionUser(token) {
   if (!s) return null;
   if (s.expires < Date.now()) {
     sessions.delete(token);
+    saveSessions();
     return null;
   }
   return users[s.username] || null;
 }
 
 export function destroySession(token) {
-  if (token) sessions.delete(token);
+  if (token && sessions.delete(token)) saveSessions();
 }
 
 export function addCoins(username, n) {

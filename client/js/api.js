@@ -9,6 +9,11 @@ export async function api(path, opts = {}) {
   let data = {};
   try { data = await res.json(); } catch { /* no body */ }
   if (!res.ok) {
+    // Сессия протухла (или сервер перезапустился) — сообщаем приложению.
+    // Логин/регистрацию не трогаем: там 401 — это «неверный пароль».
+    if (res.status === 401 && path !== '/api/login' && path !== '/api/register') {
+      try { window.dispatchEvent(new CustomEvent('auth:expired')); } catch { /* ignore */ }
+    }
     const err = new Error(data.error || `HTTP ${res.status}`);
     err.status = res.status;
     throw err;
