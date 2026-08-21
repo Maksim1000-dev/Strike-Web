@@ -24,6 +24,12 @@ export class HUD {
 
     this._hmTimer = null;
     this._damageTimer = null;
+    this.inGame = false; // в меню оверлей принудительно скрыт
+  }
+
+  setInGame(v) {
+    this.inGame = v;
+    if (!v && this.overlayEl) this.overlayEl.classList.add('hidden');
   }
 
   setFps(v) { if (this.fpsEl) this.fpsEl.textContent = `${v} FPS`; }
@@ -93,6 +99,10 @@ export class HUD {
   // playing=true — курсор захвачен (или включён fallback), оверлей скрыт.
   setPlaying(playing, pointerLockUnavailable) {
     if (!this.overlayEl) return;
+    if (!this.inGame) {
+      this.overlayEl.classList.add('hidden');
+      return;
+    }
     if (playing) {
       this.overlayEl.classList.add('hidden');
       if (this.hintEl) {

@@ -7,6 +7,7 @@ export class SettingsPanel {
     this.panel = document.getElementById('settings-panel');
     this.btnOpen = document.getElementById('btn-settings');
     this.btnClose = document.getElementById('btn-close-settings');
+    this.btnExitMenu = document.getElementById('btn-exit-menu');
     this.qualityBtns = Array.from(document.querySelectorAll('[data-level]'));
     this.mapBtns = Array.from(document.querySelectorAll('[data-map]'));
     this.fpsToggle = document.getElementById('opt-fps');
@@ -21,6 +22,12 @@ export class SettingsPanel {
   _bind() {
     this.btnOpen.addEventListener('click', () => this.setOpen(true));
     this.btnClose.addEventListener('click', () => this.setOpen(false));
+    if (this.btnExitMenu) {
+      this.btnExitMenu.addEventListener('click', () => {
+        this.setOpen(false);
+        if (this.ctx.exitGame) this.ctx.exitGame();
+      });
+    }
 
     this.qualityBtns.forEach((btn) => {
       btn.addEventListener('click', () => {

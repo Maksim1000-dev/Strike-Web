@@ -2,6 +2,9 @@ import http from 'node:http';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { initStore } from './store.js';
+import { handleApi } from './api.js';
+import { createMultiplayer } from './ws.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.join(__dirname, '..', 'client');
@@ -25,6 +28,8 @@ const MIME = {
   '.woff2': 'font/woff2',
 };
 
+initStore();
+
 function send(res, status, body, type) {
   res.writeHead(status, {
     'Content-Type': type || 'application/octet-stream',
@@ -34,7 +39,6 @@ function send(res, status, body, type) {
 }
 
 function resolvePath(urlPath) {
-  // Три.js и аддоны раздаём из node_modules через стабильные "vendor" URL.
   if (urlPath === '/vendor/three.module.js') {
     return path.join(NODE_MODULES, 'three', 'build', 'three.module.js');
   }
@@ -47,7 +51,21 @@ function resolvePath(urlPath) {
   return filePath.startsWith(ROOT) ? filePath : null;
 }
 
-const server = http.createServer((req, res) => {
+function readBody(req) {
+  return new Promise((resolve, reject) => {
+    let size = 0;
+    const chunks = [];
+    req.on('data', (c) => {
+      size += c.length;
+      if (size > 1e6) { reject(new Error('body too large')); req.destroy(); return; }
+      chunks.push(c);
+    });
+    req.on('end', () => resolve(Buffer.concat(chunks).toString('utf8')));
+    req.on('error', reject);
+  });
+}
+
+const server = http.createServer(async (req, res) => {
   let urlPath;
   try {
     urlPath = decodeURIComponent((req.url || '/').split('?')[0]);
@@ -55,8 +73,23 @@ const server = http.createServer((req, res) => {
     return send(res, 400, 'Bad request');
   }
 
-  if (urlPath === '/') urlPath = '/index.html';
+  const url = new URL(req.url || '/', 'http://localhost');
 
+  // API
+  if (url.pathname.startsWith('/api/')) {
+    let body = {};
+    if (req.method === 'POST' || req.method === 'PUT') {
+      try {
+        body = JSON.parse((await readBody(req)) || '{}');
+      } catch {
+        body = {};
+      }
+    }
+    return handleApi(req, res, url, body);
+  }
+
+  // Статика
+  if (urlPath === '/') urlPath = '/index.html';
   const filePath = resolvePath(urlPath);
   if (!filePath) return send(res, 403, 'Forbidden');
 
@@ -70,6 +103,8 @@ const server = http.createServer((req, res) => {
   });
 });
 
+createMultiplayer(server);
+
 server.listen(PORT, HOST, () => {
-  console.log(`Strike-Web dev server: http://${HOST}:${PORT}`);
+  console.log(`Strike-Web server: http://${HOST}:${PORT}  (static + API + WebSocket /ws)`);
 });

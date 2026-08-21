@@ -9,6 +9,7 @@
     "start": "node server/dev-server.js"
   },
   "dependencies": {
-    "three": "^0.160.0"
+    "three": "^0.160.0",
+    "ws": "^8.21.3"
   }
 }

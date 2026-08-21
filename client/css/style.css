@@ -329,6 +329,33 @@ html, body {
 
 #btn-close-settings.primary:hover { background: #ffc35e; }
 
+button.ghost {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  color: #e9eef5;
+  cursor: pointer;
+}
+
+button.ghost:hover { background: rgba(255, 255, 255, 0.12); }
+
+button.primary {
+  background: #ffb43a;
+  border: none;
+  color: #16120a;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+button.primary:hover { background: #ffc35e; }
+
+#btn-exit-menu.ghost {
+  width: 100%;
+  margin-top: 8px;
+  padding: 12px;
+  border-radius: 8px;
+  font-size: 14px;
+}
+
 /* ---------- Start overlay ---------- */
 #overlay {
   position: fixed;
@@ -363,3 +390,200 @@ html, body {
   font-size: 15px;
   color: rgba(233, 238, 245, 0.85);
 }
+
+/* ---------- Экраны (auth / menu / cases) ---------- */
+.screen {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: radial-gradient(ellipse at center, rgba(12, 16, 24, 0.9), rgba(3, 5, 9, 0.97));
+  color: #e9eef5;
+}
+
+.panel {
+  width: min(360px, calc(100vw - 40px));
+  padding: 30px 28px;
+  border-radius: 16px;
+  background: rgba(16, 20, 28, 0.92);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.6);
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.panel.wide { width: min(460px, calc(100vw - 40px)); }
+
+.logo {
+  font-size: 34px;
+  letter-spacing: 5px;
+  color: #ffb43a;
+  text-align: center;
+  text-shadow: 0 0 24px rgba(255, 180, 58, 0.45);
+  margin: 0;
+}
+
+.logo.sm { font-size: 26px; }
+
+.sub {
+  text-align: center;
+  font-size: 12px;
+  letter-spacing: 2px;
+  color: rgba(233, 238, 245, 0.5);
+  margin: 0;
+}
+
+/* Вкладки */
+.tabs {
+  display: flex;
+  gap: 8px;
+}
+
+.tabs button {
+  flex: 1;
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(255, 255, 255, 0.04);
+  color: #e9eef5;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.tabs button.active {
+  background: #ffb43a;
+  border-color: #ffb43a;
+  color: #16120a;
+  font-weight: 600;
+}
+
+/* Форма */
+#auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+#auth-form input[type="text"],
+#auth-form input[type="password"] {
+  padding: 12px 14px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  background: rgba(0, 0, 0, 0.35);
+  color: #e9eef5;
+  font-size: 15px;
+  outline: none;
+}
+
+#auth-form input:focus { border-color: #ffb43a; }
+
+button.big { padding: 14px; border-radius: 8px; font-size: 16px; width: 100%; }
+
+.error {
+  min-height: 18px;
+  font-size: 13px;
+  color: #ff6a5a;
+  text-align: center;
+}
+
+/* Меню */
+.profile {
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 10px;
+  padding: 16px;
+  text-align: center;
+}
+
+.pname { font-size: 20px; font-weight: 700; letter-spacing: 1px; }
+.pcoins { font-size: 26px; font-weight: 700; color: #ffb43a; margin-top: 6px; }
+.pstats { font-size: 13px; color: rgba(233, 238, 245, 0.6); margin-top: 8px; }
+
+#menu-online { text-align: center; font-size: 13px; letter-spacing: 1px; }
+#menu-online.online { color: #6fe08a; }
+#menu-online.offline { color: #9aa0a8; }
+
+.menu-btns {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.inventory {
+  margin-top: 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  max-height: 120px;
+  overflow-y: auto;
+}
+
+.inv-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: rgba(233, 238, 245, 0.85);
+}
+
+.rarity-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex: none;
+}
+
+.dim { color: rgba(233, 238, 245, 0.45); font-size: 13px; }
+
+/* Кейсы */
+#cases-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.case-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  border-radius: 10px;
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.case-name { flex: 1; font-size: 15px; font-weight: 600; }
+.case-cost { color: #ffb43a; font-weight: 600; }
+
+.case-open {
+  padding: 8px 14px;
+  border: none;
+  border-radius: 6px;
+  background: #ffb43a;
+  color: #16120a;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.case-open:disabled { opacity: 0.5; cursor: default; }
+
+#case-result { margin-top: 12px; }
+
+.case-result-item {
+  border: 1px solid #555;
+  border-radius: 10px;
+  padding: 14px;
+  text-align: center;
+  background: rgba(0, 0, 0, 0.35);
+}
+
+.case-result-rarity {
+  font-size: 12px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+
+.case-result-name { font-size: 17px; font-weight: 700; }

@@ -52,7 +52,6 @@
   </div>
 
   <div id="damage-flash"></div>
-
   <div id="death-overlay" class="hidden">
     <h1>ТЫ УМЕР</h1>
     <p>Возрождение через <span id="death-timer">3</span>…</p>
@@ -85,9 +84,59 @@
 
     <p id="settings-note" class="note"></p>
     <button id="btn-close-settings" class="primary">Продолжить</button>
+    <button id="btn-exit-menu" class="ghost">Выйти в меню</button>
   </div>
 
-  <div id="overlay">
+  <!-- Экран авторизации -->
+  <div id="auth-screen" class="screen hidden">
+    <div class="panel">
+      <h1 class="logo">STRIKE-WEB</h1>
+      <div class="tabs">
+        <button id="tab-login" class="active">Вход</button>
+        <button id="tab-register">Регистрация</button>
+      </div>
+      <form id="auth-form" autocomplete="off">
+        <input id="auth-username" type="text" placeholder="Логин" maxlength="20" />
+        <input id="auth-password" type="password" placeholder="Пароль" />
+        <label class="check"><input type="checkbox" id="auth-remember" /> Запомнить меня</label>
+        <div id="auth-error" class="error"></div>
+        <button id="auth-submit" type="submit" class="primary big">Войти</button>
+      </form>
+      <p id="auth-title" class="sub">ВХОД</p>
+    </div>
+  </div>
+
+  <!-- Главное меню -->
+  <div id="menu-screen" class="screen hidden">
+    <div class="panel wide">
+      <h1 class="logo">STRIKE-WEB</h1>
+      <div id="menu-online" class="online">● онлайн</div>
+      <div class="profile">
+        <div id="menu-name" class="pname"></div>
+        <div id="menu-coins" class="pcoins">0 🪙</div>
+        <div id="menu-stats" class="pstats"></div>
+      </div>
+      <div class="menu-btns">
+        <button id="btn-play" class="primary big">ИГРАТЬ</button>
+        <button id="btn-cases" class="ghost big">КЕЙСЫ</button>
+        <button id="btn-logout" class="ghost big">ВЫЙТИ</button>
+      </div>
+      <div id="menu-inventory" class="inventory"></div>
+    </div>
+  </div>
+
+  <!-- Кейсы -->
+  <div id="cases-modal" class="screen hidden">
+    <div class="panel wide">
+      <h2 class="logo sm">КЕЙСЫ</h2>
+      <div id="cases-list"></div>
+      <div id="case-result" class="hidden"></div>
+      <button id="btn-close-cases" class="ghost big">Назад</button>
+    </div>
+  </div>
+
+  <!-- Оверлей «кликни, чтобы играть» -->
+  <div id="overlay" class="hidden">
     <div class="overlay-box">
       <h1 id="overlay-title">STRIKE-WEB</h1>
       <p id="overlay-hint">Кликни, чтобы играть</p>

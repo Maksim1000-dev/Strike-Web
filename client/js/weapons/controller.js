@@ -51,6 +51,8 @@ export class WeaponController {
 
     this.player = null;   // ссылка на контроллер игрока (для ADS)
     this.onSwitch = null; // вызывается при смене оружия
+    this.remoteTargetsProvider = null; // () => меши удалённых игроков
+    this.onPlayerHit = null; // (remoteId, damage, weaponId) => {}
 
     this._applyVisible();
     this._updateHud();
@@ -117,12 +119,18 @@ export class WeaponController {
     this.sound.swing();
     this.raycaster.setFromCamera(new THREE.Vector2(0, 0), this.camera);
     this.raycaster.far = d.range;
-    const hits = this.raycaster.intersectObjects(this.world.meshes || [], true);
+    const hits = this.raycaster.intersectObjects(this._targets(), true);
     if (hits.length) {
       const h = hits[0];
-      this.effects.impact(h.point, this._faceNormal(h));
-      this._tryBreakGlass(h.object);
-      this.hud.showHitmarker();
+      const rid = h.object.userData && h.object.userData.remoteId;
+      if (rid) {
+        this.hud.showHitmarker();
+        if (this.onPlayerHit) this.onPlayerHit(rid, d.damage, this.current);
+      } else {
+        this.effects.impact(h.point, this._faceNormal(h));
+        this._tryBreakGlass(h.object);
+        this.hud.showHitmarker();
+      }
     }
   }
 
@@ -139,20 +147,29 @@ export class WeaponController {
     this.camera.getWorldPosition(_pos);
     this.raycaster.set(_pos, _dir);
     this.raycaster.far = d.range;
-    const hits = this.raycaster.intersectObjects(this.world.meshes || [], true);
+    const hits = this.raycaster.intersectObjects(this._targets(), true);
 
     this.models[this.current].muzzle.getWorldPosition(_muzzlePos);
 
     let end;
+    let playerHit = null;
     if (hits.length) {
       const h = hits[0];
       end = h.point;
-      this.effects.impact(h.point, this._faceNormal(h));
-      this._tryBreakGlass(h.object);
-      this.hud.showHitmarker();
+      const rid = h.object.userData && h.object.userData.remoteId;
+      if (rid) {
+        playerHit = rid;
+        this.hud.showHitmarker();
+      } else {
+        this.effects.impact(h.point, this._faceNormal(h));
+        this._tryBreakGlass(h.object);
+        this.hud.showHitmarker();
+      }
     } else {
       end = _muzzlePos.clone().addScaledVector(_dir, d.range);
     }
+
+    if (playerHit && this.onPlayerHit) this.onPlayerHit(playerHit, d.damage, this.current);
 
     this.effects.muzzleFlash(_muzzlePos);
     this.effects.tracer(_muzzlePos, end);
@@ -162,6 +179,12 @@ export class WeaponController {
     this.kick = Math.min(0.12, 0.05 + d.recoil * 4);
 
     this.sound.shot(d.sound);
+  }
+
+  _targets() {
+    const base = this.world && this.world.meshes ? this.world.meshes : [];
+    const extra = this.remoteTargetsProvider ? this.remoteTargetsProvider() : [];
+    return base.concat(extra);
   }
 
   _faceNormal(hit) {
