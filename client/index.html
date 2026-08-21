@@ -20,8 +20,22 @@
   <div id="hud">
     <div id="fps">-- FPS</div>
     <div id="map">Desert 2</div>
-    <div id="crosshair"></div>
-    <div id="hint">WASD — движение · Space — прыжок · Shift — бег · ЛКМ — разбить стекло · 1/2 — карты · M — настройки</div>
+
+    <div id="crosshair">
+      <span class="c top"></span>
+      <span class="c bottom"></span>
+      <span class="c left"></span>
+      <span class="c right"></span>
+    </div>
+    <div id="hitmarker">✕</div>
+
+    <div id="weapon">
+      <div id="weapon-name">Glock-18</div>
+      <div id="weapon-ammo">20 / 60</div>
+    </div>
+    <div id="reload-hint">ПЕРЕЗАРЯДКА…</div>
+
+    <div id="hint">WASD — бег · Space — прыжок · ЛКМ — огонь · R — перезарядка · 1-4 — оружие · M — настройки</div>
   </div>
 
   <button id="btn-settings" title="Настройки (M)">⚙</button>

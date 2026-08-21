@@ -10,7 +10,8 @@ export function createWorld(scene, opts = {}) {
     colliders: [],
     breakables: [],
     spawn: new THREE.Vector3(...(opts.spawn || [0, 1.7, 16])),
-    meshes: [],              // всё, что надо убрать/освободить при смене карты
+    meshes: [],              // геометрия (для рейкаста и освобождения)
+    lights: [],              // источники света (без raycast)
     proceduralTextures: [],  // процедурные текстуры этой карты (dispose при смене)
     updateEffects: null,
     applyGraphics: null,
@@ -32,7 +33,7 @@ export function createWorld(scene, opts = {}) {
     opts.hemiIntensity ?? 0.9
   );
   scene.add(hemi);
-  world.meshes.push(hemi);
+  world.lights.push(hemi);
 
   const sun = new THREE.DirectionalLight(opts.sunColor ?? 0xfff2d8, opts.sunIntensity ?? 1.5);
   sun.position.set(opts.sunPos?.[0] ?? 40, opts.sunPos?.[1] ?? 60, opts.sunPos?.[2] ?? 25);
@@ -47,7 +48,7 @@ export function createWorld(scene, opts = {}) {
   sun.shadow.camera.far = 260;
   sun.shadow.bias = -0.0005;
   scene.add(sun);
-  world.meshes.push(sun);
+  world.lights.push(sun);
   world.sun = sun;
 
   return world;
@@ -166,6 +167,7 @@ export function disposeWorld(scene, world) {
     scene.remove(m);
   }
   mats.forEach((mm) => mm.dispose());
+  for (const l of world.lights || []) scene.remove(l);
   for (const t of world.proceduralTextures || []) t.dispose();
 
   if (world.breakables) world.breakables.length = 0;

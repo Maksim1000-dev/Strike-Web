@@ -91,5 +91,7 @@ export class GlassPane {
     this.broken = true;
     spawnShards(this.scene, this.mesh.position.clone());
     this.scene.remove(this.mesh);
+    const i = this.world && this.world.meshes ? this.world.meshes.indexOf(this.mesh) : -1;
+    if (i >= 0) this.world.meshes.splice(i, 1);
   }
 }

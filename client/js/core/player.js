@@ -7,8 +7,8 @@ const _right = new THREE.Vector3();
 const _wish = new THREE.Vector3();
 
 // Контроллер от первого лица: движение, гравитация, прыжок, AABB-коллизии.
-// Вход в игру: клик → Pointer Lock; если Pointer Lock недоступен (например в iframe
-// превью) — автоматически включается fallback-режим «зажми мышь и веди».
+// Вход в игру: клик → Pointer Lock. Если Pointer Lock недоступен (iframe-превью) —
+// fallback: обзор зажатой ПКМ, огонь — ЛКМ.
 export class FirstPersonController {
   constructor(camera, domElement, world, hud) {
     this.camera = camera;
@@ -16,7 +16,6 @@ export class FirstPersonController {
     this.world = world;
     this.hud = hud || null;
 
-    // Параметры персонажа
     this.eyeHeight = 1.7;
     this.radius = 0.35;
     this.headPad = 0.2;
@@ -29,10 +28,9 @@ export class FirstPersonController {
     this.velocity = new THREE.Vector3();
     this.onGround = false;
 
-    // Состояние входа/управления обзором
-    this.locked = false;              // Pointer Lock активен
+    this.locked = false;
     this.pointerLockUnavailable = false;
-    this.fallbackActive = false;      // играем в режиме drag-to-look
+    this.fallbackActive = false;
     this.dragging = false;
     this._entering = false;
 
@@ -45,9 +43,12 @@ export class FirstPersonController {
     this._syncHud();
   }
 
-  // Играем, если захвачен курсор или включён fallback-режим.
   get playing() {
     return this.locked || this.fallbackActive;
+  }
+
+  get isMoving() {
+    return !!(keys['KeyW'] || keys['KeyA'] || keys['KeyS'] || keys['KeyD']);
   }
 
   _bind() {
@@ -59,14 +60,16 @@ export class FirstPersonController {
     };
     this._onPointerLockError = () => this._enterFallback();
 
-    // Клик в любом месте (кроме UI) = вход в игру. Ловим на document, потому что
-    // оверлей «Кликни, чтобы играть» перекрывает канвас.
+    // ЛКМ: вход в игру (или ничего — огонь обрабатывает контроллер оружия).
+    // В fallback-режиме обзор — зажатая ПКМ.
     this._onMouseDown = (e) => {
-      if (e.button !== 0) return; // только левая кнопка
-      if (this.locked) return;
       if (e.target instanceof Element && e.target.closest('#btn-settings, #settings-panel')) return;
-      if (this.fallbackActive) this.dragging = true;
-      else this._enter();
+      if (this.locked) return;
+      if (this.fallbackActive) {
+        if (e.button === 2) this.dragging = true;
+        return;
+      }
+      if (e.button === 0) this._enter();
     };
     this._onMouseMove = (e) => {
       if (this.locked || (this.fallbackActive && this.dragging)) {
@@ -74,8 +77,8 @@ export class FirstPersonController {
       }
     };
     this._onMouseUp = () => { this.dragging = false; };
+    this._onContextMenu = (e) => { if (this.fallbackActive) e.preventDefault(); };
     this._onKeyDown = (e) => {
-      // В fallback-режиме Esc возвращает в меню (в Pointer Lock Esc обрабатывает браузер).
       if (e.code === 'Escape' && this.fallbackActive && !this.locked) {
         this.fallbackActive = false;
         this.dragging = false;
@@ -88,6 +91,7 @@ export class FirstPersonController {
     document.addEventListener('mousedown', this._onMouseDown);
     document.addEventListener('mousemove', this._onMouseMove);
     document.addEventListener('mouseup', this._onMouseUp);
+    document.addEventListener('contextmenu', this._onContextMenu);
     document.addEventListener('keydown', this._onKeyDown);
   }
 
@@ -102,7 +106,6 @@ export class FirstPersonController {
     } catch {
       this._enterFallback();
     }
-    // Страховка: если за ~1.2с курсор так и не захватился — включаем fallback.
     setTimeout(() => {
       if (this._entering && !this.locked) this._enterFallback();
     }, 1200);
@@ -116,7 +119,6 @@ export class FirstPersonController {
     this._syncHud();
   }
 
-  // Выход в меню (используется панелью настроек и т.п.).
   release() {
     this._entering = false;
     this.dragging = false;
@@ -137,7 +139,7 @@ export class FirstPersonController {
   }
 
   update(dt) {
-    if (!this.playing) return; // в меню персонаж не двигается
+    if (!this.playing) return;
 
     if (keys['Space'] && this.onGround) {
       this.velocity.y = this.jumpSpeed;
@@ -186,7 +188,6 @@ export class FirstPersonController {
     }
   }
 
-  // Простейшее разрешение коллизий по осям X/Z против статичных AABB.
   _collideHorizontal() {
     const p = this.camera.position;
     const minY = p.y - this.eyeHeight;
@@ -213,6 +214,7 @@ export class FirstPersonController {
     document.removeEventListener('mousedown', this._onMouseDown);
     document.removeEventListener('mousemove', this._onMouseMove);
     document.removeEventListener('mouseup', this._onMouseUp);
+    document.removeEventListener('contextmenu', this._onContextMenu);
     document.removeEventListener('keydown', this._onKeyDown);
   }
 }

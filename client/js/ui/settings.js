@@ -58,6 +58,7 @@ export class SettingsPanel {
     if (open) {
       // Отпускаем курсор и выходим в меню, чтобы панелью можно было пользоваться.
       if (this.ctx.player) this.ctx.player.release();
+      if (this.ctx.weapon) this.ctx.weapon.setTriggerHeld(false);
       this.refresh();
     }
   }
